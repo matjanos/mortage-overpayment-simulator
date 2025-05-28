@@ -44,9 +44,10 @@ The program generates:
 --- Strategy 1: Mix Strategy ---
 Month      Payment  Overpayment   Interest  Principal     Remaining
 2025-06    3873.80      6126.20    1286.83    2586.97     188250.83
-2025-07    ...
+2025-07    3654.32      6345.68    1230.45    2423.87     179481.28
+2025-08    ...
 
-Total interest paid: 45234.56 PLN, total months: 24
+Total interest paid: 14569.43 PLN, total months: 22
 
 --- Strategy 2: Reduce Payment ---
 Month      Payment  Overpayment   Interest  Principal     Remaining
@@ -54,7 +55,7 @@ Month      Payment  Overpayment   Interest  Principal     Remaining
 2025-07    3654.32      6126.20    1230.45    2423.87     179500.76
 2025-08    ...
 
-Total interest paid: 43567.89 PLN, total months: 23
+Total interest paid: 16303.77 PLN, total months: 26
 
 --- Strategy 3: Reduce Term ---
 Month      Payment  Overpayment   Interest  Principal     Remaining
@@ -62,14 +63,50 @@ Month      Payment  Overpayment   Interest  Principal     Remaining
 2025-07    3873.80      6126.20    1230.45    2643.35     179481.28
 2025-08    ...
 
-Total interest paid: 42156.78 PLN, total months: 22
+Total interest paid: 14569.43 PLN, total months: 22
 
 --- Comparison ---
-Mix Strategy:        45234.56 PLN interest, 24 months
-Reduce Payment:      43567.89 PLN interest, 23 months
-Reduce Term:         42156.78 PLN interest, 22 months
+Mix Strategy:        14569.43 PLN interest, 22 months
+Reduce Payment:      16303.77 PLN interest, 26 months
+Reduce Term:         14569.43 PLN interest, 22 months
 
-Best strategy for interest savings: Reduce Term
+Best strategy for interest savings: Mix Strategy
+
+============================================================
+                    COST REDUCTION SUMMARY                    
+============================================================
+
+Original scenario (no overpayment):
+  Interest: 43211.61 PLN, Duration: 63 months
+
+Savings compared to original:
+  Mix Strategy:     28642.18 PLN saved, 41 months shorter
+  Reduce Payment:   26907.84 PLN saved, 37 months shorter
+  Reduce Term:      28642.18 PLN saved, 41 months shorter
+
+============================================================
+                 INTEREST COST COMPARISON                 
+============================================================
+
+Interest Cost Comparison (each █ ≈ 864 PLN):
+Original (no overpay): ██████████████████████████████████████████████████ 43212 PLN
+Mix Strategy:          ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 14569 PLN
+Reduce Payment:        ███████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 16304 PLN
+Reduce Term:           ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 14569 PLN
+
+Loan Duration Comparison (each █ ≈ 1.3 months):
+Original (no overpay): ██████████████████████████████████████████████████ 63 months
+Mix Strategy:          █████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 22 months
+Reduce Payment:        ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 26 months
+Reduce Term:           █████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 22 months
+
+┌────────────────────────────────────────────────────────┐
+│                    RECOMMENDATION                      │
+├────────────────────────────────────────────────────────┤
+│ Best for MAXIMUM SAVINGS: Mix Strategy                 │
+│ Saves: 28642 PLN vs original scenario                  │
+│ Reduces loan by: 41 months                             │
+└────────────────────────────────────────────────────────┘
 ```
 
 ## Benefits
