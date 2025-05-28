@@ -17,18 +17,26 @@ This program simulates mortgage repayment using three different overpayment stra
 Run the simulation with required parameters:
 
 ```bash
-python simulate.py --balance 196964 --interest 7.84 --payment 3873.80 --max 10000 --months 62
+python simulate.py --balance 196964 --interest 7.84 --payment 3873.80 --max 10000 --months 62 --day 15 --currency PLN
+```
+
+For other currencies, simply change the `--currency` parameter:
+
+```bash
+python simulate.py --balance 50000 --interest 6.5 --payment 1200 --max 2500 --months 48 --currency USD
 ```
 
 ### Parameters
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `--balance` | Remaining loan balance (PLN) | 196964 |
+| `--balance` | Remaining loan balance | 196964 |
 | `--interest` | Annual interest rate (%) | 7.84 |
-| `--payment` | Current monthly payment (PLN) | 3873.80 |
-| `--max` | Maximum monthly amount you can pay (PLN) | 10000 |
+| `--payment` | Current monthly payment | 3873.80 |
+| `--max` | Maximum monthly amount you can pay | 10000 |
 | `--months` | Remaining months until original end date | 62 |
+| `--day` | Payment day of month (1-28, optional, default: 1) | 15 |
+| `--currency` | Currency symbol (optional, default: PLN) | USD |
 
 ## Output
 
@@ -117,6 +125,7 @@ This tool helps you:
 - Calculate potential interest savings in both time and money
 - View detailed month-by-month payment schedules
 - Identify the optimal strategy for your financial situation
+- Support multiple currencies for international users
 
 ## Strategy Details
 

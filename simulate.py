@@ -1,13 +1,30 @@
 import argparse
 from datetime import datetime, timedelta
+import calendar
 
-def simulate_strategy(balance, annual_interest_rate, monthly_payment, custom_payment, total_months, mode):
+def add_months(date, months):
+    """Add months to a date, handling month boundaries properly"""
+    month = date.month - 1 + months
+    year = date.year + month // 12
+    month = month % 12 + 1
+    day = min(date.day, calendar.monthrange(year, month)[1])
+    return date.replace(year=year, month=month, day=day)
+
+def simulate_strategy(balance, annual_interest_rate, monthly_payment, custom_payment, total_months, mode, payment_day=1):
     monthly_interest = annual_interest_rate / 12
     remaining_balance = balance
     month_count = 0
     total_interest = 0.0
     schedule = []
-    current_date = datetime.today().replace(day=1)
+    
+    # Start from next month's payment day
+    today = datetime.today()
+    if today.day <= payment_day:
+        # If we haven't passed this month's payment day, start from this month
+        current_date = today.replace(day=payment_day)
+    else:
+        # If we've passed this month's payment day, start from next month
+        current_date = add_months(today.replace(day=payment_day), 1)
     
     # Calculate constant overpayment for reduce_payment strategy
     constant_overpayment = custom_payment - monthly_payment if mode == "reduce_payment" else 0
@@ -56,7 +73,7 @@ def simulate_strategy(balance, annual_interest_rate, monthly_payment, custom_pay
             "Remaining Balance": round(max(remaining_balance, 0), 2)
         })
 
-        current_date += timedelta(days=30)
+        current_date = add_months(current_date, 1)
         month_count += 1
 
     return schedule, total_interest, month_count
@@ -69,13 +86,20 @@ def print_schedule(schedule, label):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Mortgage repayment simulation.")
-    parser.add_argument("--balance", type=float, required=True, help="Remaining loan balance (PLN)")
+    parser.add_argument("--balance", type=float, required=True, help="Remaining loan balance")
     parser.add_argument("--interest", type=float, required=True, help="Annual interest rate (e.g. 7.84 for 7.84%)")
-    parser.add_argument("--payment", type=float, required=True, help="Current monthly payment (PLN)")
-    parser.add_argument("--max", type=float, required=True, help="Maximum monthly amount you can pay (PLN)")
+    parser.add_argument("--payment", type=float, required=True, help="Current monthly payment")
+    parser.add_argument("--max", type=float, required=True, help="Maximum monthly amount you can pay")
     parser.add_argument("--months", type=int, required=True, help="Remaining number of months until the original end date")
+    parser.add_argument("--day", type=int, default=1, help="Payment day of month (1-28, default: 1)")
+    parser.add_argument("--currency", type=str, default="PLN", help="Currency symbol (default: PLN)")
 
     args = parser.parse_args()
+
+    # Validate payment day
+    if args.day < 1 or args.day > 28:
+        print("Error: Payment day must be between 1 and 28")
+        exit(1)
 
     # Strategy 1: Mix strategy (formerly reduce_payment)
     schedule1, interest1, months1 = simulate_strategy(
@@ -84,7 +108,8 @@ if __name__ == "__main__":
         monthly_payment=args.payment,
         custom_payment=args.max,
         total_months=args.months,
-        mode="mix"
+        mode="mix",
+        payment_day=args.day
     )
 
     # Strategy 2: Pure reduce payment strategy
@@ -94,7 +119,8 @@ if __name__ == "__main__":
         monthly_payment=args.payment,
         custom_payment=args.max,
         total_months=args.months,
-        mode="reduce_payment"
+        mode="reduce_payment",
+        payment_day=args.day
     )
 
     # Strategy 3: Reduce term strategy
@@ -104,22 +130,23 @@ if __name__ == "__main__":
         monthly_payment=args.payment,
         custom_payment=args.max,
         total_months=args.months,
-        mode="reduce_term"
+        mode="reduce_term",
+        payment_day=args.day
     )
 
     print_schedule(schedule1, "Strategy 1: Mix Strategy")
-    print(f"\nTotal interest paid: {interest1:.2f} PLN, total months: {months1}")
+    print(f"\nTotal interest paid: {interest1:.2f} {args.currency}, total months: {months1}")
 
     print_schedule(schedule2, "Strategy 2: Reduce Payment")
-    print(f"\nTotal interest paid: {interest2:.2f} PLN, total months: {months2}")
+    print(f"\nTotal interest paid: {interest2:.2f} {args.currency}, total months: {months2}")
 
     print_schedule(schedule3, "Strategy 3: Reduce Term")
-    print(f"\nTotal interest paid: {interest3:.2f} PLN, total months: {months3}")
+    print(f"\nTotal interest paid: {interest3:.2f} {args.currency}, total months: {months3}")
 
     print(f"\n--- Comparison ---")
-    print(f"Mix Strategy:        {interest1:.2f} PLN interest, {months1} months")
-    print(f"Reduce Payment:      {interest2:.2f} PLN interest, {months2} months")
-    print(f"Reduce Term:         {interest3:.2f} PLN interest, {months3} months")
+    print(f"Mix Strategy:        {interest1:.2f} {args.currency} interest, {months1} months")
+    print(f"Reduce Payment:      {interest2:.2f} {args.currency} interest, {months2} months")
+    print(f"Reduce Term:         {interest3:.2f} {args.currency} interest, {months3} months")
     
     best_interest = min(interest1, interest2, interest3)
     if interest1 == best_interest:
@@ -144,7 +171,8 @@ if __name__ == "__main__":
         monthly_payment=args.payment,
         custom_payment=args.payment,  # No overpayment
         total_months=args.months,
-        mode="reduce_term"
+        mode="reduce_term",
+        payment_day=args.day
     )
     
     savings1 = original_interest - interest1
@@ -156,11 +184,11 @@ if __name__ == "__main__":
     time_saved3 = original_months - months3
     
     print(f"\nOriginal scenario (no overpayment):")
-    print(f"  Interest: {original_interest:.2f} PLN, Duration: {original_months} months")
+    print(f"  Interest: {original_interest:.2f} {args.currency}, Duration: {original_months} months")
     print(f"\nSavings compared to original:")
-    print(f"  Mix Strategy:     {savings1:>8.2f} PLN saved, {time_saved1:>2} months shorter")
-    print(f"  Reduce Payment:   {savings2:>8.2f} PLN saved, {time_saved2:>2} months shorter")
-    print(f"  Reduce Term:      {savings3:>8.2f} PLN saved, {time_saved3:>2} months shorter")
+    print(f"  Mix Strategy:     {savings1:>8.2f} {args.currency} saved, {time_saved1:>2} months shorter")
+    print(f"  Reduce Payment:   {savings2:>8.2f} {args.currency} saved, {time_saved2:>2} months shorter")
+    print(f"  Reduce Term:      {savings3:>8.2f} {args.currency} saved, {time_saved3:>2} months shorter")
     
     # ASCII Visualization
     print(f"\n{'='*60}")
@@ -175,11 +203,11 @@ if __name__ == "__main__":
         width = int(value * scale)
         return '█' * width + '░' * (max_width - width)
     
-    print(f"\nInterest Cost Comparison (each █ ≈ {max_interest/50:.0f} PLN):")
-    print(f"Original (no overpay): {create_bar(original_interest)} {original_interest:.0f} PLN")
-    print(f"Mix Strategy:          {create_bar(interest1)} {interest1:.0f} PLN")
-    print(f"Reduce Payment:        {create_bar(interest2)} {interest2:.0f} PLN")
-    print(f"Reduce Term:           {create_bar(interest3)} {interest3:.0f} PLN")
+    print(f"\nInterest Cost Comparison (each █ ≈ {max_interest/50:.0f} {args.currency}):")
+    print(f"Original (no overpay): {create_bar(original_interest)} {original_interest:.0f} {args.currency}")
+    print(f"Mix Strategy:          {create_bar(interest1)} {interest1:.0f} {args.currency}")
+    print(f"Reduce Payment:        {create_bar(interest2)} {interest2:.0f} {args.currency}")
+    print(f"Reduce Term:           {create_bar(interest3)} {interest3:.0f} {args.currency}")
     
     # Time comparison
     print(f"\nLoan Duration Comparison (each █ ≈ {original_months/50:.1f} months):")
@@ -206,11 +234,11 @@ if __name__ == "__main__":
     
     # Line 1: Best strategy
     line1_text = f" Best for MAXIMUM SAVINGS: {best_strategy}"
-    line1_spaces = box_width - len(line1_text) - 1  # -1 for the space at the end
+    line1_spaces = box_width - len(line1_text) - 1
     print(f"│{line1_text}{' ' * line1_spaces} │")
     
     # Line 2: Savings amount
-    line2_text = f" Saves: {max_savings:.0f} PLN vs original scenario"
+    line2_text = f" Saves: {max_savings:.0f} {args.currency} vs original scenario"
     line2_spaces = box_width - len(line2_text) - 1
     print(f"│{line2_text}{' ' * line2_spaces} │")
     
